@@ -1,4 +1,4 @@
-package com.example.seckill;
+package com.d9.seckill;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
