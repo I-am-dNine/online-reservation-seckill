@@ -46,4 +46,17 @@ public class UserService {
         return new AuthResponse(token);
     }
     
+    public String createAdmin(AuthRequest request) {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("用户名已存在");
+        }
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role("ADMIN")
+                .build();
+        userRepository.save(user);
+        return "管理员创建成功";
+    }
+    
 }

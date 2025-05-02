@@ -22,5 +22,11 @@ public class AuthController {
     public AuthResponse login(@RequestBody AuthRequest request) {
         return userService.login(request);
     }
+
+    // TODO ：仅开发期可用
+    @PostMapping("/init-admin")
+    public String createAdmin(@RequestBody AuthRequest request) {
+        return userService.createAdmin(request);
+    }
     
 }
