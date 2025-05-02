@@ -52,4 +52,13 @@ public class JwtTokenProvider {
             return false;
         }
     }
+
+    public String getRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
 }
