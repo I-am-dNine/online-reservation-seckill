@@ -22,7 +22,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.disable())  // 禁用 CORS
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/**").permitAll()  // 明確允許 /api 路徑
                 .anyRequest().permitAll()
             );
         return http.build();
