@@ -38,4 +38,11 @@ public class EventController {
         return eventService.findAll();
     }
 
+    @PostMapping("/preload/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String preload(@PathVariable Long id) {
+        eventService.preloadStockToRedis(id);
+        return "库存已加载到 Redis";
+    }
+
 }
