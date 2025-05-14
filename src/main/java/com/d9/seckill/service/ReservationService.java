@@ -2,6 +2,7 @@ package com.d9.seckill.service;
 
 import com.d9.seckill.entity.*;
 import com.d9.seckill.repository.*;
+import com.d9.seckill.dto.ReservationAdminDTO;
 import com.d9.seckill.dto.ReservationDTO;
 
 import jakarta.transaction.Transactional;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
@@ -69,4 +71,24 @@ public class ReservationService {
                 r.getEvent().getEndTime()
         )).collect(Collectors.toList());
     }
+
+    public List<ReservationAdminDTO> getAll(Optional<Long> eventIdOpt) {
+        List<Reservation> list;
+    
+        if (eventIdOpt.isPresent()) {
+            Event event = eventRepository.findById(eventIdOpt.get())
+                .orElseThrow(() -> new RuntimeException("活动不存在"));
+            list = reservationRepository.findAllByEvent(event);
+        } else {
+            list = reservationRepository.findAll();
+        }
+    
+        return list.stream().map(r -> new ReservationAdminDTO(
+            r.getId(),
+            r.getUser().getUsername(),
+            r.getEvent().getTitle(),
+            r.getReservedAt()
+        )).collect(Collectors.toList());
+    }
+    
 }
