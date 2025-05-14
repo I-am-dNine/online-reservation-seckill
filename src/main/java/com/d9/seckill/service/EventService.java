@@ -1,6 +1,7 @@
 package com.d9.seckill.service;
 
 import com.d9.seckill.entity.Event;
+import com.d9.seckill.dto.EventAdminDTO;
 import com.d9.seckill.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EventService {
@@ -51,6 +53,19 @@ public class EventService {
     
         String key = "event:stock:" + eventId;
         redisTemplate.opsForValue().set(key, event.getAvailableSlots());
+    }
+
+    public List<EventAdminDTO> getAllForAdmin() {
+        return eventRepository.findAll().stream().map(e ->
+            new EventAdminDTO(
+                e.getId(),
+                e.getTitle(),
+                e.getAvailableSlots(),
+                e.getTotalSlots(),
+                e.getStartTime(),
+                e.getEndTime()
+            )
+        ).collect(Collectors.toList());
     }
     
 }
