@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>预约抢购系统</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h2>活动列表</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>标题</th>
+                <th>剩余名额</th>
+                <th>时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="event : ${events}">
+                <td th:text="${event.title}"></td>
+                <td th:text="${event.availableSlots} + '/' + ${event.totalSlots}"></td>
+                <td>
+                    <span th:text="${#temporals.format(event.startTime, 'yyyy-MM-dd HH:mm')}"></span> -
+                    <span th:text="${#temporals.format(event.endTime, 'yyyy-MM-dd HH:mm')}"></span>
+                </td>
+                <td>
+                    <form th:action="@{/seckill/{id}(id=${event.id})}" method="post">
+                        <button type="submit">抢购</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${message}" th:text="${message}" style="color:green;"></p>
+</body>
+</html>
