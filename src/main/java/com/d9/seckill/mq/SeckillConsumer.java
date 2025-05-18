@@ -25,7 +25,13 @@ public class SeckillConsumer {
         String username = message.getUsername();
         Long eventId = message.getEventId();
 
-        User user = userRepository.findByUsername(username).orElseThrow();
+        // Early return if user doesn't exist
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            System.err.println("User not found: " + username);
+            return;
+        }
+
         Event event = eventRepository.findById(eventId).orElseThrow();
 
         // 幂等性检查（防止重复预约）
