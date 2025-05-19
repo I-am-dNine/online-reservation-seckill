@@ -2,6 +2,7 @@ package com.d9.seckill.service;
 
 import com.d9.seckill.entity.*;
 import com.d9.seckill.repository.*;
+import com.d9.seckill.dto.PagedResult;
 import com.d9.seckill.dto.ReservationAdminDTO;
 import com.d9.seckill.dto.ReservationDTO;
 
@@ -9,10 +10,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +82,7 @@ public class ReservationService {
     
         if (eventIdOpt.isPresent()) {
             Event event = eventRepository.findById(eventIdOpt.get())
-                .orElseThrow(() -> new RuntimeException("活动不存在"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Event not found"));
             list = reservationRepository.findAllByEvent(event);
         } else {
             list = reservationRepository.findAll();
@@ -89,6 +94,28 @@ public class ReservationService {
             r.getEvent().getTitle(),
             r.getReservedAt()
         )).collect(Collectors.toList());
+    }
+    
+    public PagedResult<ReservationAdminDTO> getAllPaged(Optional<Long> eventIdOpt, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<Reservation> reservationPage;
+    
+        if (eventIdOpt.isPresent()) {
+            Event event = eventRepository.findById(eventIdOpt.get())
+                .orElseThrow(() -> new RuntimeException("活动不存在"));
+            reservationPage = reservationRepository.findAllByEvent(event, pageable);
+        } else {
+            reservationPage = reservationRepository.findAll(pageable);
+        }
+    
+        List<ReservationAdminDTO> dtoList = reservationPage.getContent().stream().map(r -> new ReservationAdminDTO(
+                r.getId(),
+                r.getUser().getUsername(),
+                r.getEvent().getTitle(),
+                r.getReservedAt()
+        )).toList();
+    
+        return new PagedResult<>(dtoList, page, size, reservationPage.getTotalElements(), reservationPage.getTotalPages());
     }
     
 }

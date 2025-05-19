@@ -1,6 +1,7 @@
 package com.d9.seckill.controller;
 
 import com.d9.seckill.dto.EventAdminDTO;
+import com.d9.seckill.dto.PagedResult;
 import com.d9.seckill.dto.ReservationAdminDTO;
 import com.d9.seckill.service.EventService;
 import com.d9.seckill.service.ReservationService;
@@ -28,7 +29,11 @@ public class AdminController {
 
     @GetMapping("/reservations")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ReservationAdminDTO> listReservations(@RequestParam(required = false) Long eventId) {
-        return reservationService.getAll(Optional.ofNullable(eventId));
+    public PagedResult<ReservationAdminDTO> listReservations(
+        @RequestParam Optional<Long> eventId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        return reservationService.getAllPaged(eventId, page, size);
     }
 }
