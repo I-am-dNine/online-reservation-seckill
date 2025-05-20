@@ -1,0 +1,606 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "线上预约抢购系统 API",
+        "description": "这是由 D9 开发的预约系统后端接口文档",
+        "version": "v1.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080",
+            "description": "Generated server url"
+        }
+    ],
+    "tags": [
+        {
+            "name": "预约管理",
+            "description": "用户预约相关接口"
+        },
+        {
+            "name": "秒杀管理",
+            "description": "秒杀活动相关接口"
+        },
+        {
+            "name": "认证管理",
+            "description": "用户注册、登录和管理员初始化接口"
+        },
+        {
+            "name": "管理员接口",
+            "description": "管理员专用接口，包含活动和预约管理"
+        },
+        {
+            "name": "活动管理",
+            "description": "活动CRUD和库存预加载接口"
+        }
+    ],
+    "paths": {
+        "/api/event/{id}": {
+            "put": {
+                "tags": [
+                    "活动管理"
+                ],
+                "summary": "更新活动",
+                "description": "管理员更新活动信息",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Event"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Event"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "活动管理"
+                ],
+                "summary": "删除活动",
+                "description": "管理员删除指定活动",
+                "operationId": "delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/seckill/{eventId}": {
+            "post": {
+                "tags": [
+                    "秒杀管理"
+                ],
+                "summary": "参与秒杀",
+                "description": "用户参与指定活动的秒杀",
+                "operationId": "seckill",
+                "parameters": [
+                    {
+                        "name": "eventId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reservation/{eventId}": {
+            "post": {
+                "tags": [
+                    "预约管理"
+                ],
+                "summary": "创建预约",
+                "description": "用户预约指定活动",
+                "operationId": "reserve",
+                "parameters": [
+                    {
+                        "name": "eventId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/event": {
+            "get": {
+                "tags": [
+                    "活动管理"
+                ],
+                "summary": "获取活动列表",
+                "description": "获取所有活动信息",
+                "operationId": "getAll",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Event"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "活动管理"
+                ],
+                "summary": "创建活动",
+                "description": "管理员创建新的活动",
+                "operationId": "create",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Event"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Event"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/event/preload/{id}": {
+            "post": {
+                "tags": [
+                    "活动管理"
+                ],
+                "summary": "预加载库存",
+                "description": "将活动库存预加载到Redis中",
+                "operationId": "preload",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "tags": [
+                    "认证管理"
+                ],
+                "summary": "注册新用户",
+                "description": "创建新的普通用户账号",
+                "operationId": "register",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AuthRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "tags": [
+                    "认证管理"
+                ],
+                "summary": "用户登录",
+                "description": "用户登录并获取JWT令牌",
+                "operationId": "login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AuthRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/init-admin": {
+            "post": {
+                "tags": [
+                    "认证管理"
+                ],
+                "summary": "初始化管理员",
+                "description": "仅开发环境可用，创建管理员账号",
+                "operationId": "createAdmin",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AuthRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/reservation/me": {
+            "get": {
+                "tags": [
+                    "预约管理"
+                ],
+                "summary": "我的预约",
+                "description": "查看当前用户的所有预约",
+                "operationId": "myReservations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ReservationDTO"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/reservations": {
+            "get": {
+                "tags": [
+                    "管理员接口"
+                ],
+                "summary": "获取预约列表",
+                "description": "管理员查看预约列表，支持分页和按活动筛选",
+                "operationId": "listReservations",
+                "parameters": [
+                    {
+                        "name": "eventId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PagedResultReservationAdminDTO"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/admin/events": {
+            "get": {
+                "tags": [
+                    "管理员接口"
+                ],
+                "summary": "获取所有活动",
+                "description": "管理员查看所有活动列表",
+                "operationId": "listAllEvents",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EventAdminDTO"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Event": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "totalSlots": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "availableSlots": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "startTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "endTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "AuthRequest": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                }
+            },
+            "AuthResponse": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ReservationDTO": {
+                "type": "object",
+                "properties": {
+                    "eventTitle": {
+                        "type": "string"
+                    },
+                    "reservedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "eventStartTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "eventEndTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "PagedResultReservationAdminDTO": {
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ReservationAdminDTO"
+                        }
+                    },
+                    "page": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "size": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalElements": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "totalPages": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "ReservationAdminDTO": {
+                "type": "object",
+                "properties": {
+                    "reservationId": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "eventTitle": {
+                        "type": "string"
+                    },
+                    "reservedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "EventAdminDTO": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "availableSlots": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "totalSlots": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "startTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "endTime": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            }
+        }
+    }
+}
