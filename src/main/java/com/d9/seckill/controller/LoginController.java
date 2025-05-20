@@ -55,7 +55,7 @@ public class LoginController {
             session.setAttribute("username", username);
             
             logger.debug("Login successful for user: {} with role: {}", username, role);
-            return "redirect:/events";
+            return "ROLE_ADMIN".equals(role) ? "redirect:/admin/reservations" : "redirect:/events";
         } catch (Exception e) {
             logger.error("Login failed for user: " + username, e);
             model.addAttribute("error", "登录失败：" + e.getMessage());

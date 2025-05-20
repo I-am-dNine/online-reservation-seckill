@@ -38,6 +38,7 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -78,7 +79,7 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/events", true)
+                .successHandler(customAuthenticationSuccessHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )

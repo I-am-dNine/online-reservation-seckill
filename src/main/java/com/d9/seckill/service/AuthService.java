@@ -3,6 +3,8 @@ package com.d9.seckill.service;
 import com.d9.seckill.dto.AuthRequest;
 import com.d9.seckill.entity.User;
 import com.d9.seckill.repository.UserRepository;
+import com.d9.seckill.security.JwtTokenProvider;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +21,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final JwtTokenProvider jwtTokenProvider;
+
 
     public String login(AuthRequest request) {
         try {
@@ -31,8 +35,10 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
 
             String token = jwtService.generateToken(user);
-            logger.debug("Generated JWT token for user: {}", request.getUsername());
-            return token;
+            String role = jwtTokenProvider.getRole(token);
+
+            logger.debug("Login successful for user: {} with role: {}",  request.getUsername(), role);
+            return "ROLE_ADMIN".equals(role) ? "redirect:/admin/reservations" : "redirect:/events";
         } catch (AuthenticationException e) {
             logger.error("Authentication failed for user: " + request.getUsername(), e);
             throw new RuntimeException("用户名或密码错误");
