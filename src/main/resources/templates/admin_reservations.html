@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>预约纪录管理</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h2>预约纪录总览</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>编号</th>
+                <th>用户名</th>
+                <th>活动标题</th>
+                <th>预约时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="r : ${paged.content}">
+                <td th:text="${r.reservationId}"></td>
+                <td th:text="${r.username}"></td>
+                <td th:text="${r.eventTitle}"></td>
+                <td th:text="${#temporals.format(r.reservedAt, 'yyyy-MM-dd HH:mm')}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div>
+        <span>当前页: [[${paged.page}]] / 总页数: [[${paged.totalPages}]]</span>
+        <div>
+            <a th:if="${paged.page > 0}" th:href="@{/admin/reservations(page=${paged.page - 1}, size=${paged.size})}">上一页</a>
+            <a th:if="${paged.page < paged.totalPages - 1}" th:href="@{/admin/reservations(page=${paged.page + 1}, size=${paged.size})}">下一页</a>
+        </div>
+    </div>
+
+    <p><a href="/events">返回使用者活动页</a></p>
+</body>
+</html>
