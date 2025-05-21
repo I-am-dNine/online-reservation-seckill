@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: seckill-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: seckill
+      MYSQL_USER: seckilluser
+      MYSQL_PASSWORD: seckillpass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - seckill-net
+
+  redis:
+    image: redis:7.2
+    container_name: seckill-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - seckill-net
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: seckill-rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"     # broker
+      - "15672:15672"   # UI
+    networks:
+      - seckill-net
+
+  seckill-app:
+    build: .
+    container_name: seckill-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/seckill?useSSL=false&serverTimezone=Asia/Taipei&characterEncoding=utf8&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: seckilluser
+      SPRING_DATASOURCE_PASSWORD: seckillpass
+      SPRING_REDIS_HOST: redis
+      SPRING_RABBITMQ_HOST: rabbitmq
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+    networks:
+      - seckill-net
+
+volumes:
+  mysql_data:
+
+networks:
+  seckill-net:

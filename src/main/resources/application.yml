@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/seckill?useSSL=false&serverTimezone=Asia/Kuala_Lumpur
+    url: jdbc:mysql://192.168.0.249:3306/seckill
     username: root
     password: dummypassword
     driver-class-name: com.mysql.cj.jdbc.Driver
