@@ -1,26 +1,30 @@
 package com.d9.seckill.service;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
-
 import com.d9.seckill.entity.Event;
 import com.d9.seckill.entity.User;
 import com.d9.seckill.repository.EventRepository;
 import com.d9.seckill.repository.ReservationRepository;
 import com.d9.seckill.repository.UserRepository;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
+@Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ReservationServiceTest {
 
     @Autowired
@@ -36,7 +40,7 @@ public class ReservationServiceTest {
     private ReservationRepository reservationRepository;
 
     @BeforeEach
-    void setup() {
+    void clearData() {
         reservationRepository.deleteAll();
         eventRepository.deleteAll();
         userRepository.deleteAll();
@@ -64,7 +68,7 @@ public class ReservationServiceTest {
         Event event = new Event();
         event.setTitle("Test Event");
         event.setTotalSlots(10);
-        event.setAvailableSlots(10); // 重点字段
+        event.setAvailableSlots(10);
         event.setStartTime(LocalDateTime.now().plusDays(1));
         event = eventRepository.save(event);
 
@@ -113,7 +117,7 @@ public class ReservationServiceTest {
         Event event = new Event();
         event.setTitle("Full Event");
         event.setTotalSlots(1);
-        event.setAvailableSlots(0); // 名额已满
+        event.setAvailableSlots(0); // 名额为 0
         event.setStartTime(LocalDateTime.now().plusDays(1));
         event = eventRepository.save(event);
 
