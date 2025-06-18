@@ -1,4 +1,4 @@
-# System Overview - Online Reservation & Seckill System 系统架构总览、组件说明 
+# System Overview - 线上预约抢购系统系统架构总览
 
 本文件为《线上预约抢购系统》的系统总览，目标为展示高并发处理能力的后端作品，适用于简历项目展示与技能实作。
 
@@ -6,10 +6,10 @@
 
 ## 💼 Project Goals
 
-- 实作一个支持高并发预约 / 抢购操作的后端系统
+- 实作一个支持**高并发预约 / 抢购**操作的完整后端系统
 - 防止超卖、重复预约等问题
-- 整合现代后端关键技术：Redis 缓存、分布式锁、限流、异步消息队列、Spring Security、JWT、Docker
-- 适用于个人履历项目，可对外展示
+- 整合现代后端关键技术：Redis 缓存、分布式锁、限流、异步消息队列、Spring Security、JWT、Docker 等
+- 用于**个人履历项目**展示，强调可运行性与架构完整性
 
 ---
 
@@ -18,73 +18,111 @@
 | 模块 | 功能说明 |
 |------|----------|
 | 👤 使用者模块 (User) | 注册、登录（JWT）、浏览可预约项目、发起预约、查询个人预约纪录 |
-| 🛠 管理者模块 (Admin) | 后台登录、创建/编辑预约项目、查看预约总表 |
-| 📦 抢购模块 (Seckill) | 提供活动预约接口、库存控制、限流保护、异步排队处理 |
-| 🔐 权限与认证模块 | 使用 JWT 实现无状态身份认证，Spring Security 控制接口权限 |
-| ⚙️ 基础设施 | Redis（缓存/限流/锁）、RabbitMQ（异步处理）、Swagger（接口文档）、Docker（部署）
+| 🛠 管理者模块 (Admin) | 后台登录、创建/编辑预约项目、分页查看预约纪录 |
+| 📦 预约模块 (Reservation) | 提供预约接口、库存控制、限流保护、异步排队处理 |
+| 🔐 权限认证模块 | JWT 实现无状态认证，Spring Security 控管接口权限 |
+| ⚙️ 系统基础设施 | Redis（缓存/限流/库存锁）、RabbitMQ（异步入库）、Swagger（API Docs）、Docker（部署） |
 
 ---
-## 🧩 System Architecture Diagram (Mermaid)
+
+## 🧩 System Architecture Diagram
 
 ```mermaid
-graph TD
-    A[前端客户端/Postman/Swagger UI] --> B[Spring Boot Application]
-
-    subgraph B[Spring Boot 后端]
-        B1[Auth Controller]
-        B2[Event Controller]
-        B3[Seckill Controller]
-        B4[Admin Controller]
-        S1[User Service]
-        S2[Event Service]
-        S3[Seckill Service]
-        R1[UserRepository]
-        R2[EventRepository]
-        R3[OrderRepository]
+flowchart TB
+    subgraph 前端/客户端
+        A1[浏览器 / Postman / Swagger UI]
     end
 
-    B1 --> S1 --> R1
-    B2 --> S2 --> R2
-    B3 --> S3 --> R2
-    B4 --> S2
+    subgraph 应用层（Spring Boot）
+        A2[AuthController]
+        A3[EventController]
+        A4[ReservationController]
+        A5[AdminController]
+    end
 
-    B3 --> RedisCache[(Redis 缓存/库存/限流)]
-    B3 --> RabbitMQQueue[(RabbitMQ 队列)]
+    subgraph 业务逻辑层（Service）
+        B1[UserService]
+        B2[EventService]
+        B3[ReservationService]
+    end
+
+    subgraph 数据访问层（Repository）
+        C1[UserRepository]
+        C2[EventRepository]
+        C3[ReservationRepository]
+    end
+
+    subgraph 外部服务（Infra）
+        D1[Redis - 缓存/库存/限流]
+        D2[RabbitMQ - 异步队列]
+        D3[MySQL - 持久存储]
+    end
+
+    A1 --> A2 --> B1 --> C1 --> D3
+    A1 --> A3 --> B2 --> C2 --> D3
+    A1 --> A4 --> B3 --> C2 & C3 --> D3
+    B3 --> D1
+    B3 --> D2
 ```
 
 ---
 
-## 🔀 Layered Architecture (Spring Boot 分层)
+## 🧱 Layered Architecture (Spring Boot 分层)
 
-- Controller Layer：接收请求、参数验证
-- Service Layer：业务逻辑处理（预约流程、库存控制）
-- Repository Layer：使用 Spring Data JPA 处理数据库 CRUD
-- Security Layer：JWT 生成、解析与权限验证
-- Infrastructure Layer：与 Redis、RabbitMQ 等外部系统整合
+- Controller Layer：接收 HTTP 请求、验证参数、授权校验
+- Service Layer：业务逻辑处理（预约流程、库存判断、异步派送）
+- Repository Layer：Spring Data JPA 实作数据库存取
+- Security Layer：JWT 登录授权、权限控管
+- Infra Layer：与 Redis、RabbitMQ 等组件对接
 
 ---
 
-## ⚙️ High Concurrency Optimization Design
-| 技术点 | 用途 | 实作位置说明 |
-|--------|------|---------------|
-| Redis 缓存库存 | 降低数据库压力，预扣库存 | 抢购前将库存缓存到 Redis，由 Redis 控制递减 |
-| 分布式锁 | 控制库存一致性 | 使用 Redis `SETNX` / Redisson 锁住关键操作 |
-| 限流器 | 防止恶意刷抢 | 使用 Guava RateLimiter 或 Redis 令牌桶 |
-| RabbitMQ 队列 | 异步处理订单入库 | 抢购成功后将请求丢入 MQ，后台消费者处理 DB 写入 |
-| JWT 认证 | 用户无状态登录 | 登录后生成 Token，后续请求中验证有效性 |
-| Spring Security | 权限控制 | 控制 ADMIN 和 USER 的访问接口范围 |
+## ⚙️ 高并发处理设计
+
+| 技术点                  | 说明                 | 实作位置                                   |
+| -------------------- | ------------------ | -------------------------------------- |
+| Redis 缓存库存           | 降低 DB 访问压力         | 抢购开始前将库存同步至 Redis，Redis 自减控制           |
+| 分布式锁                 | 避免超卖               | 使用 Redis / Lua 脚本 / 乐观锁控制并发写入          |
+| 限流器                  | 拦截异常请求流量           | 使用 Guava RateLimiter 或 Redis 实作令牌桶     |
+| RabbitMQ 异步队列        | 分担写入压力、异步入库        | 用户预约成功后推送请求，消费者异步写入数据库                 |
+| JWT 无状态认证            | 提升认证效率与扩展性         | 登录后回传 Token，后续透过 Header 或 Session 验证   |
+| Spring Security 权限控管 | 区分 USER / ADMIN 权限 | Controller 接口使用 `@PreAuthorize` 限制权限访问 |
 
 ---
 
 ## 👤 用户角色说明
-| 角色 | 权限 |
-|------|------|
-| USER | 注册、登录、浏览项目、发起预约、查看个人预约 |
-| ADMIN | 登录、管理活动（CRUD）、查看所有预约纪录 |
+
+| 角色    | 权限说明               |
+| ----- | ------------------ |
+| USER  | 浏览活动、预约活动、查看我的预约   |
+| ADMIN | 管理活动、查看预约纪录、后台权限操作 |
+
 
 ---
 
-## 🔗 后续文档链接（待开发）
-- auth-flow.md - 注册 / 登录流程
-- db-design.md - 数据表与实体结构说明
-- seckill-flow.md - 抢购流程与高并发设计细节
+## 🔗 相关文档
+
+| 主题            | 文件                                              |
+| ------------- | ----------------------------------------------- |
+| 🔐 身份验证流程     | [`docs/auth-flow.md`](auth-flow.md)             |
+| 🧱 系统架构说明     | [`docs/system-overview.md`](system-overview.md) |
+| 🗃 数据库设计      | [`docs/db-design.md`](db-design.md)             |
+| ⚙️ 抢购流程与高并发优化 | [`docs/seckill-flow.md`](seckill-flow.md)       |
+
+
+---
+
+✅ 实作状态对照
+
+| 模块                     | 状态    | 说明                                    |
+| ---------------------- | ----- | ------------------------------------- |
+| User 模块                | ✅ 已完成 | 注册 / 登录 / JWT 登录测试                    |
+| Event 模块               | ✅ 已完成 | CRUD + 后台分页查看                         |
+| Reservation 模块         | ✅ 已完成 | 包含重复预约判断、库存判断、分页管理接口                  |
+| Redis 优化               | ✅ 已完成 | Lua 脚本库存扣减、防重复预约 Key 设计               |
+| RabbitMQ               | ✅ 已完成 | 队列发送端与消费端测试通过                         |
+| 前端页面                   | ✅ 已完成 | Thymeleaf 页面展示，登录与预约可操作               |
+| 单元测试                   | ✅ 已完成 | 各 Service / Controller 层均已覆盖          |
+| 测试配置                   | ✅ 已完成 | 使用 H2 + `application-test.yml`        |
+| 安全配置（test）             | ✅ 已完成 | Profile `test` 安全策略覆盖                 |
+| GlobalExceptionHandler | ✅ 已完成 | RuntimeException 捕获并输出 ResponseEntity |
