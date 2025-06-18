@@ -1,76 +1,137 @@
-# Seckill Reservation System
+# ⚡ Seckill Reservation System
 
-A high-concurrency online reservation & seckill system built with Spring Boot, MySQL, Redis, RabbitMQ, and other modern backend technologies.
+A **high-concurrency online reservation & flash sale system** built with Java, Spring Boot, Redis, RabbitMQ and Docker.  
+Designed to **handle massive concurrent requests** with reliability, responsiveness, and fairness.
 
-## 🔧 Tech Stack
-
-- Java 17
-- Spring Boot 3
-- Spring Data JPA
-- Spring Security + JWT
-- MySQL
-- Redis (for caching & locking)
-- RabbitMQ (for async processing)
-- Docker (for container deployment)
-
-## 📌 Project Stages
-
-1. **Environment Setup & Base Functions**
-   - Spring Boot skeleton project
-   - MySQL + JPA configuration
-   - User registration/login (JWT auth)
-   - Basic Event CRUD API
-
-2. **Low Concurrency Reservation Flow**
-   - Prevent duplicate booking
-   - Basic error handling
-
-3. **High Concurrency Optimization**
-   - Optimistic Lock
-   - Redis stock caching
-   - Rate limiting
-   - RabbitMQ async queue
-
-4. **Finalization & Polish**
-   - Admin interface
-   - Logging, Docker, Swagger docs
-   - Frontend (simple React or Thymeleaf)
-
-## ❓Q&A
-
-### Q1：如果一百万人同时抢票，系统怎么决定谁先谁后？
-
-**A1：**  
-虽然用户看起来是“同时”点击抢购按钮，但实际上，从请求发出到被系统处理，会经过多个阶段，每一层都存在**细微但真实的时间差**：
-
-> 🕸️ 网络传输 → 🖥️ 服务器接收 → ⚙️ 系统调度 → 📦 Redis 排队执行
-
-Redis 是**单线程运行**的，因此会**严格按照请求抵达 Redis 的顺序（FIFO）**依次处理。谁先到，谁就先被处理，这也就自然决定了谁能抢到票。
+> 🎯 Project Goal: Build a scalable system for high-volume reservation/seckill events, with full-stack features and real-world architecture patterns.
 
 ---
 
-### 📌 补充：Redis 如何保持顺序？
+## 🪜 Project Stages
 
-✅ Redis 是单线程执行模型，这意味着它在任意时刻**只处理一个请求**。  
-即使两个请求仅相差 0.000001 秒，它也会：
+1. **Environment Setup & Base Functions**
+   - ✅ Spring Boot project skeleton
+   - ✅ MySQL + JPA integration
+   - ✅ User registration & JWT login
+   - ✅ Event CRUD API
 
-🔧 如何记录“谁先抢到”？
-可以借助 Redis 的 ZADD（有序集合）命令，将用户 ID 和当前时间戳作为分值写入排行榜，从而实现“谁先抢到”的精确排名逻辑。例如：
+2. **Low Concurrency Reservation Flow**
+   - ✅ Reservation core logic
+   - ✅ Duplicate reservation prevention
+   - ✅ Basic error handling
 
-```redis
-ZADD ticket_rankings <timestamp> <user_id>
+3. **High Concurrency Optimization**
+   - ✅ Redis cache & stock deduction (Lua script)
+   - ✅ Optimistic locking for race condition safety
+   - ✅ Rate limiting (Guava / Redis)
+   - ✅ RabbitMQ async queue processing
+
+4. **System Enhancement & Polish**
+   - ✅ Admin interface for event & reservation record
+   - ✅ Global exception handling
+   - ✅ Swagger3 API documentation
+   - ✅ Docker deployment
+   - ✅ Thymeleaf frontend (React optional)
+
+---
+
+## 🔥 Key Features
+
+- ✅ User registration & login with JWT
+- ✅ Create and manage events (CRUD)
+- ✅ Reservation API with duplicate prevention
+- ✅ Redis cache & Lua script for atomic stock deduction
+- ✅ Rate limiting (Guava / Redis)
+- ✅ RabbitMQ async queue for traffic peak smoothing
+- ✅ Admin interface for viewing reservation records
+- ✅ Global exception handler & logging
+- ✅ Swagger API docs
+- ✅ Docker containerization
+- ✅ Frontend interface (Thymeleaf version ready)
+
+---
+
+## 🧱 Tech Stack
+
+| Layer      | Technology |
+|------------|------------|
+| Language   | Java 17 |
+| Backend    | Spring Boot 3, Spring Security, JWT |
+| Database   | MySQL + Spring Data JPA |
+| Cache      | Redis |
+| Messaging  | RabbitMQ |
+| Frontend   | Thymeleaf (React optional) |
+| Tools      | Swagger 3 / OpenAPI, Docker, JUnit 5 |
+
+---
+
+## 🚀 Quick Start
+
+### 🐳 Option 1: Run via Docker Compose
+
+```bash
+docker-compose up --build
 ```
-这样你就可以快速获取前 10 名、前 100 名等信息：
-```redis
-ZRANGE ticket_rankings 0 9 WITHSCORES
+Then visit:
+- Frontend UI: http://localhost:8080
+- Swagger API Docs: http://localhost:8080/swagger-ui.html
+
+✨ Default Admin Account: admin / admin123
+
+### 💻 Option 2: Local Run (Dev Profile)
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+Requires:
+- Java 17+
+- MySQL running with schema seckill
+- Redis and RabbitMQ running locally
+
+---
+
+## 📄 Project Modules
+
+- auth - JWT login/logout logic
+- event - Activity/event CRUD
+- reservation - Reservation service & controller
+- admin - Backend management page
+- config - Security + global exception + test profiles
+
+---
+
+## 📚 Documentation
+
+| Topic                    | File                                                 |
+| ------------------------ | ---------------------------------------------------- |
+| 🔐 Auth Flow             | [`docs/auth-flow.md`](docs/auth-flow.md)             |
+| 🧱 System Architecture   | [`docs/system-overview.md`](docs/system-overview.md) |
+| 🗃️ DB Schema Design      | [`docs/db-design.md`](docs/db-design.md)             |
+| ⚙️ High Concurrency Flow | [`docs/seckill-flow.md`](docs/seckill-flow.md)       |
+
+---
+
+## ✅ Test Coverage
+
+- UserServiceTest ✅
+- EventServiceTest ✅
+- ReservationServiceTest ✅
+- ReservationControllerTest ✅
+
+Use:
+```bash
+./mvnw test
 ```
 
-🔚 总结
-所谓“同时抢票”其实是一个近似的假象。系统的核心抢购逻辑本质上依赖两个机制：
-- 系统各层级的天然时间差异（网络传输、调度等）
-- Redis 单线程 + 排队机制确保请求有序处理
-这就是为什么即使上百万人一起抢，也始终会有一个明确的“第一名”。
+---
 
+## 👨‍💻 Author
 
-## ✨ Author
-Powered by D9
+Created by D9
+
+---
+
+## ⭐ Future Enhancements (Ideas)
+
+-[] Add React SPA frontend (optional)
+-[] Add dynamic feature flags (per event)
+-[] Add metrics dashboard (Actuator / Prometheus)
