@@ -21,6 +21,8 @@
           </elementProp>
         </collectionProp>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Test Plan">
@@ -37,7 +39,7 @@
         <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Seckill API">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">8080</stringProp>
-          <stringProp name="HTTPSampler.path">/api/seckill/7</stringProp>
+          <stringProp name="HTTPSampler.path">/api/seckill/17</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
@@ -51,7 +53,7 @@
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyLTIiLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc0NjYyOTcyNywiZXhwIjoxNzQ2NjMzMzI3fQ.zZZN83uSqP8aiGt2JzfMx_7-wrS6p_g0XvWitLKeLow</stringProp>
+                <stringProp name="Header.value">Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyLWQ5Iiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NDY3MDQzOTcsImV4cCI6MTc0NjcwNzk5N30.Wu34yapmEbDXwzYPMgfbpBkIjyU9rxEvojAKH4Ho-78</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
