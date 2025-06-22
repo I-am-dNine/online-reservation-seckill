@@ -77,7 +77,7 @@ flowchart TB
 
 ---
 
-## ⚙️ 高并发处理设计
+## ⚙️ High Concurrency Optimization Design
 
 | 技术点                  | 说明                 | 实作位置                                   |
 | -------------------- | ------------------ | -------------------------------------- |
@@ -87,6 +87,28 @@ flowchart TB
 | RabbitMQ 异步队列        | 分担写入压力、异步入库        | 用户预约成功后推送请求，消费者异步写入数据库                 |
 | JWT 无状态认证            | 提升认证效率与扩展性         | 登录后回传 Token，后续透过 Header 或 Session 验证   |
 | Spring Security 权限控管 | 区分 USER / ADMIN 权限 | Controller 接口使用 `@PreAuthorize` 限制权限访问 |
+
+---
+
+## 🌐 Deployment Architecture（部署架构图）
+
+```mermaid
+graph TD
+    User[🌐 使用者 / 浏览器] -->|HTTP| App[🧩 Spring Boot App]
+    App --> DB[(🗄️ MySQL)]
+    App --> Cache[(⚡ Redis)]
+    App --> MQ[(📨 RabbitMQ)]
+    App --> Docs[📄 Swagger UI / OpenAPI]
+    Admin[🧑‍💼 管理员前端] -->|HTTP| App
+```
+
+### 💡 简化本地开发架构（非容器）也可用以下文字补充：
+- 使用者透过浏览器或 Postman 呼叫 Spring Boot 后端服务
+- 后端透过 JDBC 连线至本地 MySQL
+- Redis 提供库存缓存与限流功能
+- RabbitMQ 处理高并发预约请求的异步队列
+- Swagger 提供 API 文档查看与测试
+- 前端使用 Thymeleaf 或 React 串接后端接口
 
 ---
 
